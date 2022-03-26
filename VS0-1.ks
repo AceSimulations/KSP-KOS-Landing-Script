@@ -16,17 +16,43 @@ if boostback = 0 {
     sas off.
     lock steering to up.
     WAIT UNTIL ALT:RADAR < 100000.
-    wait 1.
+    wait 3.
     RUNPATH("0:/VS2b.ks").
   }
   else {
     rcs off.
-    wait until ship:verticalspeed < -10.
+    WAIT UNTIL ALT:RADAR > 70000.
+    print "Transfering Fuel".
+    SET header to SHIP:PARTSDUBBED("Header").
+    SET central to SHIP:PARTSDUBBED("Central").
+    SET lower to SHIP:PARTSDUBBED("Lower").
+    SET base to SHIP:PARTSDUBBED("Base").
+    print "Fuel Transfer Start".
+    wait .1.
+    SET LF1 TO TRANSFERALL("LqdMethane", header, central).
+    SET LF2 TO TRANSFERALL("LqdMethane", central, lower).
+    SET LF3 TO TRANSFERALL("LqdMethane", lower, base).
+    wait .1.
+    print "Liguid Fuel Transfer Nominal".
+    SET LF1:ACTIVE to TRUE.
+    SET LF2:ACTIVE to TRUE.
+    SET LF3:ACTIVE to TRUE.
+    print "Liguid Fuel Transfer Complete".
+    wait .1.
+    SET OX1 TO TRANSFERALL("OXIDIZER", header, central).
+    SET OX2 TO TRANSFERALL("OXIDIZER", central, lower).
+    SET OX3 TO TRANSFERALL("OXIDIZER", lower, base).
+    print "Oxidizer Fuel Transfer Nominal".
+    wait .1.
+    SET OX1:ACTIVE to TRUE.
+    SET OX2:ACTIVE to TRUE.
+    SET OX3:ACTIVE to TRUE.
+    print "Oxidizer Fuel Transfer Complete".
     AG7 on.
     rcs on.
     sas off.
     lock steering to up.
-    WAIT UNTIL ALT:RADAR < 100000.
+    wait until ALT:RADAR > 100000.
     wait 3.
     RUNPATH("0:/VS2b.ks").
   }

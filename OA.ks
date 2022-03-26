@@ -9,7 +9,7 @@ until SHIP:PERIAPSIS > 100000 {
     lock THROTTLE to .3.
     print correction_vector:MAG at(0,5).
 }
-until (correction_vector:MAG < .1) {
+until (correction_vector:MAG < 1) {
     lock THROTTLE to .1.
 }
 lock THROTTLE to 0.

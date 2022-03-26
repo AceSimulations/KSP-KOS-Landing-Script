@@ -7,7 +7,7 @@ SET count to 0.         //countdown 0 = no  1 = yes
 SET TargetALT TO 175000.//orbital altitude
 
 //Init
-SET AltFlat TO TargetALT - 1000.   //altitude to be burning flat
+SET AltFlat TO 175000 - 1000.   //altitude to be burning flat
 SET y to 90.            //init grapvity turn pitch
 SET speed to 83.        //gravity turn speed
 set StageSep to 0.      //0=not staged 1=staged ------ SET TO 1 FOR EXPEND BOOSTER
@@ -69,7 +69,6 @@ sas off.
 gear off.
 SET Vehicle_Status to "Status [3]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
 SET WARP TO 3.
-
 set target to "DroneShip".
 wait .1.
 lock DronePos to Target:GEOPOSITION.
@@ -101,7 +100,7 @@ until SHIP:APOAPSIS > TargetALT {
     if StageSep = 0 AND lngoff <= 0 {
         LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((y * -1),VCRS(boostbackv,BODY:POSITION))*boostbackv,FACING:TOPVECTOR).
         lock throttle to .5.
-        wait until lngoff <= -0.1.   //MAIN OVERSHOOT
+        wait until lngoff <= -0.18.   //MAIN OVERSHOOT
         unlock steering.
         sas on.
         SET Vehicle_Status to "Status [4]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
@@ -110,17 +109,18 @@ until SHIP:APOAPSIS > TargetALT {
         AG9 on.
         set StageSep to 1.
         wait 1.
+        SET AltFlat TO TargetALT - 1000.   //altitude to be burning flat
+        SET y TO (90-((speed/100)*((SHIP:APOAPSIS/AltFlat)*100))).
+        set speed to 99.
+        sas off.
+        rcs on.
         toggle AG1.
         toggle AG2.
         wait 3.
         lock throttle to 1.
-        set speed to 99.
-        sas off.
-        rcs on.
         unlock lngoff.
         unlock latoff.
         unlock boostbackv.
-        // SET WARP TO 3.
         SET Vehicle_Status to "Status [5]".  // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
     }
 
