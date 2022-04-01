@@ -11,7 +11,6 @@ wait until ALT:RADAR > 1000.
 
 if boostback = 0 {
   if ship:verticalspeed < -10 {
-    AG7 on.
     rcs on.
     sas off.
     lock steering to up.
@@ -20,8 +19,10 @@ if boostback = 0 {
     RUNPATH("0:/VS2b.ks").
   }
   else {
+    wait until ALT:RADAR > 500.
     rcs off.
-    WAIT UNTIL ALT:RADAR > 70000.
+    print ship:mass.
+    WAIT UNTIL ship:mass < 80.
     print "Transfering Fuel".
     SET header to SHIP:PARTSDUBBED("Header").
     SET central to SHIP:PARTSDUBBED("Central").
@@ -48,7 +49,6 @@ if boostback = 0 {
     SET OX2:ACTIVE to TRUE.
     SET OX3:ACTIVE to TRUE.
     print "Oxidizer Fuel Transfer Complete".
-    AG7 on.
     rcs on.
     sas off.
     lock steering to up.

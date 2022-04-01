@@ -114,6 +114,7 @@ until SHIP:APOAPSIS > TargetALT {
         set speed to 99.
         sas off.
         rcs on.
+        print ship:mass.
         toggle AG1.
         toggle AG2.
         wait 3.
