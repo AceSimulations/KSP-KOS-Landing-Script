@@ -3,7 +3,7 @@ CLEARSCREEN.
 
 //Orbit Param
 SET INCLINATION to 90.  //inclination
-SET count to 0.         //countdown 0 = no  1 = yes
+SET count to 1.         //countdown 0 = no  1 = yes
 SET TargetALT TO 175000.//orbital altitude
 
 //Init

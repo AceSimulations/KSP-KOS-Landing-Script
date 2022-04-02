@@ -21,7 +21,7 @@ lock entryYawDir to lookdirup(vecTar, up:vector).
 lock EntryAngle to Heading(srfretrograde:pitch, entryYawDir:yaw, srfretrograde:roll).
 SET WARPMODE TO "PHYSICS".
 set EntryBurn to 0.
-set radarOffset to 36.	//400 is switch (325)
+set radarOffset to 400. //36
 lock trueRadar to alt:radar - radarOffset.			// Offset radar to get distance from gear to ground
 lock g to constant:g * body:mass / body:radius^2.		// Gravity (m/s^2)
 lock maxDecel to (ship:availablethrust / ship:mass) - g.	// Maximum deceleration possible (m/s^2)
@@ -302,8 +302,8 @@ UNTIL RShut = 1 {
               set driftAdjust to 0.001.
 
               if lngoff > 0 { //slow horz speed
-                Set gain to -2.
                 set output to -1*ship:velocity:surface*angleAxis(gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
+                Set gain to -2.
                 SET Vehicle_Status to "Status [6P1]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach
               }
               else {  //pitch up from undershooting
@@ -314,7 +314,7 @@ UNTIL RShut = 1 {
                 }
                 else {
                   set output to 1*ship:velocity:surface*angleAxis(gain*vang(line_of_sight,up:vector),vcrs(up:vector,line_of_sight)).
-                  Set gain to -1.
+                  Set gain to -3.
                 }
               }
             }
