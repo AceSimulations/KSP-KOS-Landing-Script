@@ -15,7 +15,6 @@ if boostback = 0 {
     sas off.
     lock steering to up.
     WAIT UNTIL ALT:RADAR < 100000.
-    wait 3.
     RUNPATH("0:/VS2b.ks").
   }
   else {

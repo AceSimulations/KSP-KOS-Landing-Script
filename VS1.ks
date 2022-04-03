@@ -3,13 +3,13 @@ CLEARSCREEN.
 
 //Orbit Param
 SET INCLINATION to 90.  //inclination
-SET count to 1.         //countdown 0 = no  1 = yes
+SET count to 0.         //countdown 0 = no  1 = yes
 SET TargetALT TO 175000.//orbital altitude
 
 //Init
 SET AltFlat TO 175000 - 1000.   //altitude to be burning flat
 SET y to 90.            //init grapvity turn pitch
-SET speed to 83.        //gravity turn speed
+SET speed to 80.        //gravity turn speed
 set StageSep to 0.      //0=not staged 1=staged ------ SET TO 1 FOR EXPEND BOOSTER
 SET WARPMODE TO "PHYSICS".
 set sepAlt to 150000. //altitude apogee for stage separation

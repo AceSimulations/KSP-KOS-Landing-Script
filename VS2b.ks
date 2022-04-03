@@ -2,6 +2,8 @@
 
 CLEARSCREEN.
 
+WAIT UNTIL ship:verticalspeed < -10.
+
 //Flight Param
 set INCLINATION to 90. //set Orbital inclination
 
@@ -21,7 +23,7 @@ lock entryYawDir to lookdirup(vecTar, up:vector).
 lock EntryAngle to Heading(srfretrograde:pitch, entryYawDir:yaw, srfretrograde:roll).
 SET WARPMODE TO "PHYSICS".
 set EntryBurn to 0.
-set radarOffset to 400. //36
+set radarOffset to 36.
 lock trueRadar to alt:radar - radarOffset.			// Offset radar to get distance from gear to ground
 lock g to constant:g * body:mass / body:radius^2.		// Gravity (m/s^2)
 lock maxDecel to (ship:availablethrust / ship:mass) - g.	// Maximum deceleration possible (m/s^2)
@@ -232,7 +234,7 @@ UNTIL RShut = 1 {
               set driftAdjust to 0.003.
             }
             else if ALT:RADAR < 10000 {
-              rcs on.
+              rcs off.
               LOCK STEERING TO vecTar.
               set VectorLevel to 60000.
               set driftAdjust to 0.003.
@@ -286,21 +288,25 @@ UNTIL RShut = 1 {
                     set radarOffset to 36.
                 }
                 set landingStart2 to 0.
-                if lngoff > 0 {
+                if lngoff > -.001 {
                   set output to -1*ship:velocity:surface*angleAxis(gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
                   Set gain to -3.
                   SET Vehicle_Status to "Status [6P3]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach
                 }
                 else {
                   set output to 1*ship:velocity:surface*angleAxis(gain*vang(line_of_sight,up:vector),vcrs(up:vector,line_of_sight)).
-                  Set gain to -3.
+                  Set gain to -1.
                   SET Vehicle_Status to "Status [6P4]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach
                 }
                 lock steering to output.
             }
             else {  //Landing States
-              set driftAdjust to 0.001.
-
+              if ALT:RADAR < 1000 {
+                set driftAdjust to 0.001.
+              }
+              else {
+                set driftAdjust to 0.003.
+              }
               if lngoff > 0 { //slow horz speed
                 set output to -1*ship:velocity:surface*angleAxis(gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
                 Set gain to -2.
@@ -320,7 +326,7 @@ UNTIL RShut = 1 {
             }
             lock steering to output.
             lock throttle to idealThrottle.
-            SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(0,0,1),"Control",1,TRUE,0.1,TRUE).
+            //SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(0,0,1),"Control",1,TRUE,0.1,TRUE).
       }
       until ship:verticalspeed > -0.1 {
           SET Vehicle_Status to "Status [6P5]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach
