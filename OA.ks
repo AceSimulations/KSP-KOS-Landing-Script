@@ -1,8 +1,8 @@
-//Orbital Adjustment Computer X
-lock desired_obt_speed  to sqrt(ship:body:Mu / (ship:altitude + ship:body:radius)).
+//Orbital Adjustment
+lock desired_obt_speed to sqrt(ship:body:Mu / (ship:altitude + ship:body:radius)).
 lock desired_obt_vector to vxcl(-ship:body:position, ship:velocity:orbit):Normalized.
-lock desired_obt_vel    to (desired_obt_vector * desired_obt_speed).
-lock correction_vector  to (desired_obt_vel - ship:velocity:orbit).
+lock desired_obt_vel to (desired_obt_vector * desired_obt_speed).
+lock correction_vector to (desired_obt_vel - ship:velocity:orbit).
 lock STEERING to correction_vector.
 wait 3.
 until SHIP:PERIAPSIS > 100000 {

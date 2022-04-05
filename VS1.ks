@@ -147,9 +147,4 @@ sas off.
 unlock steering.
 LOCK THROTTLE to 0.
 SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
-if SHIP:PERIAPSIS < 145000 {
-    RUNPATH("0:/OA.ks").
-}
-else {
-    SHUTDOWN.
-}
+RUNPATH("0:/OA.ks").
