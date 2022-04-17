@@ -31,7 +31,7 @@ set target to "DroneShip".
 wait .1.
 //Steering Logic
 lock DronePos to Target:GEOPOSITION.  //gets lat lng coordinates of the target
-lock targetGeo TO LATLNG((DronePos:LAT),DronePos:LNG + driftAdjust).  //adds lng adjustment to coordinates
+lock targetGeo TO LATLNG((DronePos:LAT),(DronePos:LNG + driftAdjust)).  //adds lng adjustment to coordinates
 lock targetPos to targetGeo:POSITION. //gets vector to coordinates
 lock errorVector to addons:tr:impactpos:position - targetGeo:position.  //difference between predicted landing and wanted landing
 lock velVector to -ship:velocity:surface. //Literally what it says
@@ -97,7 +97,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     //Entry Burn
     if ALT:RADAR < 70000 AND SHIP:AIRSPEED > 1000 AND EntryBurn = 0 {
       until lngoff >= 0 {
-        set driftAdjust to 0.02.
+        set driftAdjust to 0.03.
         LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-15),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  //adjustment vector parallel to line between predicted and wanted landing
         SET Vehicle_Status to "Status [ 4 ]".
         AG4 on. //enables outer ring of engines
@@ -125,7 +125,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     }
     else {
       AG4 off.
-      if ALT:RADAR < 50000 AND ALT:RADAR > 20000 {  //no point in controlling in thin atmosphere
+      if ALT:RADAR < 50000 AND ALT:RADAR > 22000 {  //no point in controlling in thin atmosphere
         set EntryBurn to 1.
         LOCK STEERING TO srfretrograde.
         set limit to 10. //stop oscillation
@@ -167,33 +167,30 @@ UNTIL RShut = 1 { //Main Flight Control Loop
       print "gain" at(0, 23).
       print gain at(20, 23).
 
-      if impactTime < 3 AND landingStart = 0 {  //Deploy landing legs and target ship
-        SET Vehicle_Status to "Status [7.5]".
+      if ALT:RADAR < 300 AND landingStart = 0 {  //Deploy landing legs and target ship
+        SET Vehicle_Status to "Status [7.4]".
         set driftAdjust to 0.
+        Set gain to -.5.
         gear on.
         AG4 off.
         set radarOffset to 36.
         set landingStart to 1.
       }
       //landing burn states => ADJUSTING OVERSHOOT AMOUNT
-      if ALT:RADAR > 3500 {
-        Set gain to -3.
+      if SHIP:AIRSPEED > 500 {
+        rcs on.
+        Set gain to -1.
         SET Vehicle_Status to "Status [7.1]".
         set driftAdjust to 0.002.
       }
-      else if ALT:RADAR < 3500 AND ALT:RADAR > 2500 {
-        Set gain to -2.
+      else if SHIP:AIRSPEED < 500 AND ALT:RADAR > 1000 {
+        Set gain to -3.
         SET Vehicle_Status to "Status [7.2]".
-        set driftAdjust to 0.0005.
-      }
-      else if ALT:RADAR < 2500 AND ALT:RADAR > 1000 {
-        Set gain to -1.
-        SET Vehicle_Status to "Status [7.3]".
-        set driftAdjust to 0.0003.
+        set driftAdjust to 0.001.
       }
       else if ALT:RADAR < 1000 AND landingStart = 0 {
-        Set gain to -.5.
-        SET Vehicle_Status to "Status [7.4]".
+        Set gain to -1.
+        SET Vehicle_Status to "Status [7.3]".
         set driftAdjust to 0.0002.
       }
       //Control Angle Calc thing
@@ -204,6 +201,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
         set output to -1*ship:velocity:surface*angleAxis(1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
       }
       SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(1,0,0),"Control",1,TRUE,0.5,TRUE).  //Draws Guidance Vector for landing
+      //SET vdoutputVector TO VECDRAW(v(0,0,0),line_of_sight,RGB(0,1,0),"LOS",1,TRUE,0.5,TRUE).  //Draws Target Vector for landing
       lock steering to output.
       lock throttle to idealThrottle.
     }
