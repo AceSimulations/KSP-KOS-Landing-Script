@@ -39,7 +39,7 @@ lock result to velVector + errorVector. //Adds velocity and error to get adjustm
 lock steer to lookdirup(result, facing:topvector).  //flies result vector with relationship to up
 lock lngoff to (targetGeo:lng - addons:tr:impactpos:lng). //difference between wanted and predicted landing
 lock boostbackv to (addons:tr:impactpos:position - targetGeo:position). //horizontal adjust angle for entry burn
-lock line_of_sight to targetGeo:position - ship:position.
+lock line_of_sight to targetGeo:ALTITUDEPOSITION(100).// - ship:position.
 WAIT UNTIL ALT:RADAR < 90000.
 
 SET Vehicle_Status to "Status [ 3 ]".
@@ -98,7 +98,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     if ALT:RADAR < 70000 AND SHIP:AIRSPEED > 1000 AND EntryBurn = 0 {
       until lngoff >= 0 {
         set driftAdjust to 0.03.
-        LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-15),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  //adjustment vector parallel to line between predicted and wanted landing
+        LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-20),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  //adjustment vector parallel to line between predicted and wanted landing
         SET Vehicle_Status to "Status [ 4 ]".
         AG4 on. //enables outer ring of engines
         if ALT:RADAR < 57000 {  //starts entry burn
@@ -118,7 +118,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
         SHIP:PARTSDUBBED("fin")[1]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
         SHIP:PARTSDUBBED("fin")[2]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
         SHIP:PARTSDUBBED("fin")[3]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
-        LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-30),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  
+        LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-35),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  
       }
       set EntryBurn to 1.
       set driftAdjust to 0.0025.
@@ -170,38 +170,34 @@ UNTIL RShut = 1 { //Main Flight Control Loop
       if ALT:RADAR < 300 AND landingStart = 0 {  //Deploy landing legs and target ship
         SET Vehicle_Status to "Status [7.4]".
         set driftAdjust to 0.
-        Set gain to -.5.
+        Set gain to -1.
         gear on.
         AG4 off.
         set radarOffset to 36.
         set landingStart to 1.
       }
-      //landing burn states => ADJUSTING OVERSHOOT AMOUNT
-      if SHIP:AIRSPEED > 500 {
+      //landing burn states => ADJUSTING OVERSHOOT AMOUNT FOR DRAG COMPENSATION
+      if ALT:RADAR > 3000 {
         rcs on.
         Set gain to -1.
         SET Vehicle_Status to "Status [7.1]".
-        set driftAdjust to 0.002.
-      }
-      else if SHIP:AIRSPEED < 500 AND ALT:RADAR > 1000 {
-        Set gain to -3.
-        SET Vehicle_Status to "Status [7.2]".
         set driftAdjust to 0.001.
       }
-      else if ALT:RADAR < 1000 AND landingStart = 0 {
-        Set gain to -1.
+      else if ALT:RADAR < 3000 AND ALT:RADAR > 700 {
+        Set gain to -2.
+        SET Vehicle_Status to "Status [7.2]".
+        set driftAdjust to 0.0005.
+      }
+      else if ALT:RADAR < 700 AND landingStart = 0 {
+        Set gain to -2.
         SET Vehicle_Status to "Status [7.3]".
-        set driftAdjust to 0.0002.
+        set driftAdjust to 0.
       }
       //Control Angle Calc thing
-      if lngoff > 0 { //overshooting
-        set output to -1*ship:velocity:surface*angleAxis(-1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
-      }
-      else {  //undershooting
-        set output to -1*ship:velocity:surface*angleAxis(1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
-      }
-      SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(1,0,0),"Control",1,TRUE,0.5,TRUE).  //Draws Guidance Vector for landing
-      //SET vdoutputVector TO VECDRAW(v(0,0,0),line_of_sight,RGB(0,1,0),"LOS",1,TRUE,0.5,TRUE).  //Draws Target Vector for landing
+      set output to -1*ship:velocity:surface*angleAxis(1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
+      SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(1,0,0),"Control",1,TRUE,0.5,TRUE).  //Draws Guidance Vector
+      //SET vdoutputVector TO VECDRAW(v(0,0,0),line_of_sight,RGB(0,1,0),"LOS",1,TRUE,0.5,TRUE).  //Draws Target Vector
+      //SET vdoutputVector TO VECDRAW(v(0,0,0),ship:velocity:surface,RGB(0,0,1),"Vel",1,TRUE,0.5,TRUE).  //Draws Velocity Vector
       lock steering to output.
       lock throttle to idealThrottle.
     }

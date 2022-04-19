@@ -1,3 +1,4 @@
 # KSP-KOS-Landing-Script
 THIS IS A WORK IN PROGRESS.  
-You can use this software to learn from but I do not recommend using as a base for a project as this is very unreliable.
+To use set the first stage boot file to VS0-1 and second stage to VS0-2
+As I develop this I will improve the documentation and setup process.
