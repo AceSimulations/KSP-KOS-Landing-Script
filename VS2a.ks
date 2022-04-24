@@ -1,11 +1,8 @@
 //Vehicle Secondary Computer 2 (Use on stage 1/boosters)
 //RTLS 
-
 CLEARSCREEN.
-
 //Flight Param
 set INCLINATION to 90. //set Orbital inclination
-
 //Init
 set targetGeo to LATLNG(28.6068,-80.5983).  //land
 lock targetPos to targetGeo:POSITION.
@@ -30,12 +27,12 @@ lock latoff to (targetGeo:lat - addons:tr:impactpos:lat).
 lock boostbackv to (addons:tr:impactpos:position - targetGeo:position).
 lock targetPos to targetGeo:POSITION.
 LOCK STEERING TO -targetPos.
-
 sas off.
 SET Vehicle_Status to "Status [ 5 ]".   //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach 1EX=Entry Burn Part X
 print "Vehicle Status" at(0,22).
 print Vehicle_Status at(0,23).
 WAIT UNTIL ALT:RADAR < 80000.
+
 SET WARP TO 0.
 LOCAL surfGrav IS BODY:MU / BODY:RADIUS^2. 
 AG7 on.
@@ -48,7 +45,6 @@ sas off.
 sas on.
 wait .5.
 sas off.
-
 print "Transfering Fuel".
 SET header to SHIP:PARTSDUBBED("Header").
 SET central to SHIP:PARTSDUBBED("Central").

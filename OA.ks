@@ -4,7 +4,7 @@ lock desired_obt_vector to vxcl(-ship:body:position, ship:velocity:orbit):Normal
 lock desired_obt_vel to (desired_obt_vector * desired_obt_speed).
 lock correction_vector to (desired_obt_vel - ship:velocity:orbit).
 lock STEERING to correction_vector.
-wait 3.
+wait 5.
 until SHIP:PERIAPSIS > 100000 {
     lock THROTTLE to .3.
     print correction_vector:MAG at(0,5).
