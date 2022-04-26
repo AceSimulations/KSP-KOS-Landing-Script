@@ -1,8 +1,6 @@
 //Vehicle Secondary Computer 2 (Use on stage 1/boosters)
 //RTLS 
 CLEARSCREEN.
-//Flight Param
-set INCLINATION to 90. //set Orbital inclination
 //Init
 set targetGeo to LATLNG(28.6068,-80.5983).  //land
 lock targetPos to targetGeo:POSITION.
@@ -12,7 +10,7 @@ SET WARPMODE TO "PHYSICS".
 set radarOffset to 36.	 				// The value of alt:radar when landed (on gear)         26 for land 
 lock trueRadar to alt:radar - radarOffset.			// Offset radar to get distance from gear to ground
 lock g to constant:g * body:mass / body:radius^2.		// Gravity (m/s^2)
-lock maxDecel to (ship:availablethrust / ship:mass) - g.	// Maximum deceleration possible (m/s^2)
+lock maxDecel to ((ship:availablethrust / 3) / ship:mass) - g.	// Maximum deceleration possible (m/s^2)
 lock stopDist to ship:verticalspeed^2 / (2 * maxDecel).		// The distance the burn will require
 lock idealThrottle to stopDist / trueRadar.			// Throttle required for perfect hoverslam
 lock impactTime to trueRadar / abs(ship:verticalspeed).		// Time until impact
@@ -99,11 +97,11 @@ UNTIL ship:verticalspeed > -0.01 {
     }
 
     //RTLS
-    if ALT:RADAR > 2000 {
+    if ALT:RADAR > 1000 {
       if ALT:RADAR < 25000 AND SHIP:AIRSPEED > 950 {
          SET Vehicle_Status to "Status [1E1]".   //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach 1EX=Entry Burn Part X
           rcs off.
-          AG4 on.
+          AG4 off.
           set limit to 5.
           SHIP:PARTSDUBBED("fin")[0]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
           SHIP:PARTSDUBBED("fin")[1]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
@@ -131,7 +129,7 @@ UNTIL ship:verticalspeed > -0.01 {
           SET Vehicle_Status to "Status [1E2]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach 1EX=Entry Burn Part X
           set VectorLevel to 5000.
           AG4 off.
-          set throt to 1.
+          set throt to .6.
           set limit to 40.
           SHIP:PARTSDUBBED("fin")[0]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
           SHIP:PARTSDUBBED("fin")[1]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
@@ -160,7 +158,7 @@ UNTIL ship:verticalspeed > -0.01 {
       }
       LOCK STEERING TO vecTar.
     }
-    else if ALT:RADAR < 2000 AND trueRadar < stopDist {
+    else if ALT:RADAR < 1000 AND trueRadar < stopDist {
       SET Vehicle_Status to "Status [6P0]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach 1EX=Entry Burn Part X
       set radarOffset to 36.	 				// The value of alt:radar when landed (on gear)         26 for land
       lock trueRadar to alt:radar - radarOffset.			// Offset radar to get distance from gear to ground
@@ -187,6 +185,10 @@ UNTIL ship:verticalspeed > -0.01 {
         SET Vehicle_Status to "Status [ 7 ]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach 1EX=Entry Burn Part X
         set ship:control:pilotmainthrottle to 0.
         rcs off.
+    }
+    else {
+      gear on.
+      AG4 off.
     }
     print "Velocity Data" at(0,24).
     print SHIP:AIRSPEED at(0,31).

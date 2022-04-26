@@ -88,6 +88,9 @@ else if boostback = 1 {
     SET Vehicle_Status to "Status [ 2 ]".  //1=ascent 2=MECO/Stage Sep 3=Boostback 4=Entry 5=Approach 6=Landing Burn 7=Shutdown H=High Approach L=Low Approach 1EX=Entry Burn Part X
     print "Vehicle Status" at(0,22).
     print Vehicle_Status at(0,23).
+    lock steering to srfretrograde.
+    print "Change Active Vehicle To Me For Guidance".
+    wait 5.
     lock lngoff to (targetGeo:lng - addons:tr:impactpos:lng).
     lock latoff to (targetGeo:lat - addons:tr:impactpos:lat).
     lock boostbackv to (addons:tr:impactpos:position - targetGeo:position).
@@ -96,14 +99,16 @@ else if boostback = 1 {
     AG4 on.
 
     //Boostback Burn
-    lock throttle to 1.
-    wait until lngoff >= -.1.
-    lock throttle to .5.
+    lock throttle to .7.
+    wait until lngoff >= -1.
+    lock throttle to .8.
     AG4 off.
     wait until lngoff >= 0.
     lock throttle to 0.
+    unlock all.
 
     rcs off.
+    wait until ship:verticalspeed < -10.
     RUNPATH("0:/VS2a.ks").
   }
 }

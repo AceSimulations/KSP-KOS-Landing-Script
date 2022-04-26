@@ -5,7 +5,7 @@ CLEARSCREEN.
 SET INCLINATION to 90.  //inclination   
 //NOTE: IF INCLINATION OTHER THAN 90 Must Boostback to LS
 SET TargetALT TO 250000.//orbital altitude  250km
-SET count to 0.         //countdown 0 = no  1 = yes
+SET count to 1.         //countdown 0 = no  1 = yes
 //Init
 SET AltFlat TO 200000.   //altitude to be burning flat   200km
 SET y to 90.            //init grapvity turn pitch
