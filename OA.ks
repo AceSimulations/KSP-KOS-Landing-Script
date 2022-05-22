@@ -6,8 +6,7 @@ lock desired_obt_vel to (desired_obt_vector * desired_obt_speed).
 lock correction_vector to (desired_obt_vel - ship:velocity:orbit).
 lock STEERING to correction_vector.
 sas off.
-AG2 off.
-AG1 on.
+AG9 off.
 wait until vang(ship:facing:forevector,correction_vector) < 5.  //wait until close to angle wanted
 print "Guidance [Converged]".
 until SHIP:PERIAPSIS > 100000 {

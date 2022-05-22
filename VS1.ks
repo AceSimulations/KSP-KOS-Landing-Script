@@ -12,7 +12,8 @@ SET y to 90.            //init grapvity turn pitch
 SET speed to 80.        //gravity turn speed
 set StageSep to 0.      //0=not staged 1=staged
 lock g to constant:g * body:mass / body:radius^2. // Gravity (m/s^2)
-lock TWRThrot to 5 * Ship:Mass * g / Ship:AvailableThrust.  //Throttle to maintain TWR
+set gload to 5.
+lock TWRThrot to gload * Ship:Mass * g / Ship:AvailableThrust.  //Throttle to maintain TWR
 SET WARPMODE TO "PHYSICS".  //Allow warping
 SET Vehicle_Status to "Status [1]".            // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
 print "Vehicle Status" at(0,28).
@@ -79,7 +80,7 @@ SET Vehicle_Status to "Status [3]". // 1=pad idle 2=verticle climb 3=gravity tur
 SET WARP TO 3.  //Speed up flight profile
 
 if INCLINATION = 90 {
-    set speed to 80.
+    set speed to 70.
 }
 else {
     set speed to 60.
@@ -107,10 +108,12 @@ until SHIP:APOAPSIS > TargetALT {
             lock throttle to .7.    //throttle down for MECO/Stage Sep
         }
         if StageSep = 0 AND lngoff <= .85 {
+            set gload to 2.5.
             lock throttle to 0.     //MECO
             SET Vehicle_Status to "Status [4]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
             wait 1.
             AG9 on. //Stage Sep
+            AG1 on.
             set StageSep to 1.
             SET AltFlat TO TargetALT - 1000.   //altitude to be burning flat
             SET y TO (90-((speed/100)*((SHIP:APOAPSIS/AltFlat)*100))).
@@ -133,10 +136,12 @@ until SHIP:APOAPSIS > TargetALT {
             unlock steering.
         }
         if StageSep = 0 AND SHIP:AIRSPEED > 1600 {
+            set gload to 2.5.
             lock throttle to 0.     //MECO
             SET Vehicle_Status to "Status [4]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
             wait 1.
             AG9 on. //Stage Sep
+            AG1 on.
             set StageSep to 1.
             SET AltFlat TO TargetALT - 1000.   //altitude to be burning flat
             SET y TO (90-((speed/100)*((SHIP:APOAPSIS/AltFlat)*100))).
@@ -152,7 +157,7 @@ until SHIP:APOAPSIS > TargetALT {
         }
     }
 
-    if ALT:RADAR > 85000 AND ALT:RADAR < 90000 {    //Release Fairings
+    if ALT:RADAR > 80000 AND ALT:RADAR < 85000 {    //Release Fairings
         AG7 on.
     }
 

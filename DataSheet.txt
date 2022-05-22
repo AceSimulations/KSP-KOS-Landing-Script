@@ -1,0 +1,7 @@
+Last Updated: 5/20/22
+
+Dry Mass (No Payload): 22.3 tons
+Wet Mass (No Payload): 211 tons
+
+Max Wet Mass w/ Payload: 215 tons
+NOTE: Delivers to a 225 km Orbit with 200 m/s remaining
