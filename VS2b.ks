@@ -139,7 +139,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
       if ALT:RADAR < 500 AND landingStart = 0 {  //Deploy landing legs and target ship
         Set gain to -1. //Control gain
         Set AltOffset to 0. //Target location altitude offset
-        set radarOffset to 30.  //Onboard altimeter adjustment (CoM to ground)
+        set radarOffset to 31.  //Onboard altimeter adjustment (CoM to ground)
         set landingStart to 1.  //Locks out statement
         set driftAdjust to 0. //Zero target for bullseye
       }
@@ -173,7 +173,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     if ALT:RADAR < 75000 AND EntryBurn = 0 {
       until lngoff >= 0 {
         set driftAdjust to 0.002.
-        LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-30),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  //adjustment vector parallel to line between predicted and wanted landing
+        LOCK STEERING TO LOOKDIRUP(ANGLEAXIS((-25),VCRS(-boostbackv,BODY:POSITION))*-boostbackv,FACING:TOPVECTOR).  //adjustment vector parallel to line between predicted and wanted landing
         SET Vehicle_Status to "Status [ 4 ]".
         AG6 off.
         AG5 on.
@@ -214,7 +214,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
           rcs off.
         }
         else {
-          set driftAdjust to (DronePos:LNG - ShipPos:LNG) / (ovrshootGain + 2).  //Overshoot adjustment relative to current horizontal distance to target from Vehicle
+          set driftAdjust to (DronePos:LNG - ShipPos:LNG) / (ovrshootGain + 3).  //Overshoot adjustment relative to current horizontal distance to target from Vehicle
           rcs on.
         }
         set limit to 20. //full aero control

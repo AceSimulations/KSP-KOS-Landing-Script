@@ -9,7 +9,7 @@ SET count to 1.         //countdown 0 = no  1 = yes
 //Init
 SET AltFlat TO 200000.   //altitude to be burning flat   200km
 SET y to 90.            //init grapvity turn pitch
-SET speed to 80.        //gravity turn speed
+SET speed to 90.        //gravity turn speed
 set StageSep to 0.      //0=not staged 1=staged
 lock g to constant:g * body:mass / body:radius^2. // Gravity (m/s^2)
 set gload to 5.
@@ -72,19 +72,12 @@ wait 1.
 set target to "DroneShip".
 wait .1.
 lock DronePos to Target:GEOPOSITION.    //Geo LAT, LNG coordinates
-lock targetGeo TO LATLNG((DronePos:LAT),(DronePos:LNG + 1)).    //Target Adjustment
+lock targetGeo TO LATLNG((DronePos:LAT),(DronePos:LNG + 1.1)).    //Target Adjustment
 lock lngoff to (targetGeo:lng - addons:tr:impactpos:lng).   //Difference between predicted impact and target
 lock latoff to (targetGeo:lat - addons:tr:impactpos:lat).   //Nobody cares about lat but I will use it anyway
 lock boostbackv to (addons:tr:impactpos:position - targetGeo:position). //Parallel vector to vector between impact and target location
 SET Vehicle_Status to "Status [3]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
 SET WARP TO 3.  //Speed up flight profile
-
-if INCLINATION = 90 {
-    set speed to 70.
-}
-else {
-    set speed to 60.
-}
 
 //gravity turn loop
 until SHIP:APOAPSIS > TargetALT {   
@@ -102,12 +95,12 @@ until SHIP:APOAPSIS > TargetALT {
 
     //Stage Separation
     if INCLINATION = 90 {
-        if StageSep = 0 AND lngoff <= 1.2 { //Stop warping and stablize
+        if StageSep = 0 AND lngoff <= 1.5 { //Stop warping and stablize
             SET WARP TO 0.
             rcs on.
             lock throttle to .7.    //throttle down for MECO/Stage Sep
         }
-        if StageSep = 0 AND lngoff <= .85 {
+        if StageSep = 0 AND lngoff <= .95 {
             set gload to 2.5.
             lock throttle to 0.     //MECO
             SET Vehicle_Status to "Status [4]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
@@ -128,14 +121,14 @@ until SHIP:APOAPSIS > TargetALT {
         }
     }
     else {
-        if StageSep = 0 AND SHIP:AIRSPEED > 1400 {  //Stop warping and stablize
+        if StageSep = 0 AND SHIP:AIRSPEED > 1600 {  //Stop warping and stablize
             SET WARP TO 0.
             rcs on.
             lock throttle to .7.    //throttle down for MECO/Stage Sep
             sas on.
             unlock steering.
         }
-        if StageSep = 0 AND SHIP:AIRSPEED > 1600 {
+        if StageSep = 0 AND SHIP:AIRSPEED > 1700 {
             set gload to 2.5.
             lock throttle to 0.     //MECO
             SET Vehicle_Status to "Status [4]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2

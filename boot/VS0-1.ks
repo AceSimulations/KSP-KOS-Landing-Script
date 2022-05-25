@@ -113,12 +113,12 @@ else if boostback = 1 {
     print Vehicle_Status at(0,23).
     lock steering to srfretrograde.
     print "Change Active Vehicle To Me For Guidance".
-    wait 5.
+    wait 3.
     lock lngoff to (targetGeo:lng - addons:tr:impactpos:lng). //Lng Error
     lock latoff to (targetGeo:lat - addons:tr:impactpos:lat). //Lat Error
     lock boostbackv to (addons:tr:impactpos:position - targetGeo:position). //boostback vector
     lock steering to -boostbackv. //invert so engines push to LZ1
-    wait 7.
+    wait until vang(ship:facing:forevector,-boostbackv) < 5.  //wait until close to angle wanted
     AG6 on. //Keep outer engine on for moreee powerrrr
 
     //Boostback Burn
