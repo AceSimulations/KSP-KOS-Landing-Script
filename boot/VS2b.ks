@@ -1,11 +1,12 @@
 //ARC Block 3.1 Main Flight Computer Software (Stage 1/Boosters)
 //STATUS: 1=ascent 2=Apogee, 3=PreEntry, 4=Entry Burn, 5=Passive Control, 6=Active Aero Control, 7=Landing Burn, 8=Kill velocity, 9=PostLanding Shutdown
+wait until ship:verticalspeed < -10. 
 CLEARSCREEN.  //Prep Console
 //Variable Init
 set driftAdjust to 0.0025.  //droneship LNG position adjustment -> used for overshoot to compensate for drag
 SET WARPMODE TO "PHYSICS".  //Allow physics warp
 set EntryBurn to 0. //0= Entry Burn Enabled, 1=Entry Burn Complete
-set radarOffset to 0. //ALT:RADAR when landed
+set radarOffset to -70. //ALT:RADAR when landed
 lock trueRadar to alt:radar - radarOffset.  // Offset radar to get distance from gear to ground
 lock g to constant:g * body:mass / body:radius^2. // Gravity (m/s^2)
 lock maxDecel to ((ship:availablethrust / 1.25) / ship:mass) - g.  // Maximum deceleration possible (m/s^2)
@@ -19,7 +20,7 @@ Set AltOffset to 100. //Target location altitude offset
 set RShut to 0. //Enables main guidance loop
 set landingStart to 0.  //Enables Landing Legs deploy
 Set gain to -1. //proportion for landing burn
-Set ovrshootGain to 3. //Gain to adjust rate that overshoot amount closes to target relative to vehicle distance
+Set ovrshootGain to 4. //Gain to adjust rate that overshoot amount closes to target relative to vehicle distance
 ag6 off.  //shutdown outer engine ring
 
 //Fuel Transfer
@@ -60,7 +61,7 @@ SET OX3:ACTIVE to TRUE.
 SET OX2:ACTIVE to TRUE.
 print "Oxidizer Fuel Transfer Complete".
     
-print "Guidance V3.1".
+print "Guidance V3.4".
 SET Vehicle_Status to "Status [ 1 ]".
 rcs off.
 unlock steering.
@@ -139,11 +140,11 @@ UNTIL RShut = 1 { //Main Flight Control Loop
       if ALT:RADAR < 500 AND landingStart = 0 {  //Deploy landing legs and target ship
         Set gain to -1. //Control gain
         Set AltOffset to 0. //Target location altitude offset
-        set radarOffset to 31.  //Onboard altimeter adjustment (CoM to ground)
+        set radarOffset to -70.  //Onboard altimeter adjustment (CoM to ground)
         set landingStart to 1.  //Locks out statement
         set driftAdjust to 0. //Zero target for bullseye
       }
-      else if landingStart = 0 {
+      else {
         Set gain to -2. //More control gain
         set driftAdjust to (DronePos:LNG - ShipPos:LNG) / ovrshootGain.  //Overshoot adjustment relative to current horizontal distance to target from Vehicle
       }
@@ -160,6 +161,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     }
     until ship:verticalspeed > -0.1 { //kill all horz and vert velocity in last 150 meters for soft landing...hopefully
       SET Vehicle_Status to "Status [ 8 ]".
+      set radarOffset to 30.  //Onboard altimeter adjustment (CoM to ground)
       gear on.
       lock steering to lookdirup(-VELOCITY:SURFACE, facing:topvector).
       lock throttle to idealThrottle. 
@@ -214,8 +216,8 @@ UNTIL RShut = 1 { //Main Flight Control Loop
           rcs off.
         }
         else {
-          set driftAdjust to (DronePos:LNG - ShipPos:LNG) / (ovrshootGain + 3).  //Overshoot adjustment relative to current horizontal distance to target from Vehicle
-          rcs on.
+          set driftAdjust to (DronePos:LNG - ShipPos:LNG) / (ovrshootGain * 3).  //Overshoot adjustment relative to current horizontal distance to target from Vehicle
+          rcs off.
         }
         set limit to 20. //full aero control
         SHIP:PARTSDUBBED("fin")[0]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).

@@ -1,10 +1,11 @@
 //ARC Block 3.1 Main Flight Computer Software (Stage 1/Boosters)
 //STATUS: 1=ascent 2=Apogee, 3=PreEntry, 4=Entry Burn, 5=Passive Control, 6=Active Aero Control, 7=Landing Burn, 8=Kill velocity, 9=PostLanding Shutdown
+wait until ship:verticalspeed < -10.
 CLEARSCREEN.  //Prep Console
 //Variable Init
 SET WARPMODE TO "PHYSICS".  //Allow physics warp
 set EntryBurn to 0. //0= Entry Burn Enabled, 1=Entry Burn Complete
-set radarOffset to 0. //ALT:RADAR when landed
+set radarOffset to -50. //ALT:RADAR when landed
 lock trueRadar to alt:radar - radarOffset.  // Offset radar to get distance from gear to ground
 lock g to constant:g * body:mass / body:radius^2. // Gravity (m/s^2)
 lock maxDecel to (ship:availablethrust / ship:mass) - g.  // Maximum deceleration possible (m/s^2)
@@ -59,7 +60,7 @@ SET OX3:ACTIVE to TRUE.
 SET OX2:ACTIVE to TRUE.
 print "Oxidizer Fuel Transfer Complete".
     
-print "Guidance V3.1".
+print "Guidance V3.2".
 SET Vehicle_Status to "Status [ 1 ]".
 rcs off.
 unlock steering.
@@ -77,7 +78,7 @@ lock targetPos to targetGeo:POSITION. //gets vector to coordinates
 lock errorVector to addons:tr:impactpos:position - targetGeo:position.  //difference between predicted landing and wanted landing
 lock velVector to -ship:velocity:surface. //Literally what it says
 lock result to velVector + errorVector. //Adds velocity and error to get adjustment vector
-lock steer to lookdirup(result, facing:topvector).  //flies result vector with relationship to up
+lock steer to lookdirup(result, facing:upvector).  //flies result vector with relationship to up
 lock lngoff to (targetGeo:lng - addons:tr:impactpos:lng). //difference between wanted and predicted landing
 lock boostbackv to (addons:tr:impactpos:position - targetGeo:position). //horizontal adjust angle for entry burn
 lock line_of_sight to targetGeo:ALTITUDEPOSITION(AltOffset).  //Vector to target location with altitude offset
@@ -98,7 +99,7 @@ sas off.
 Lights on.
 set throt to 0.
 LOCK THROTTLE TO throt. //initiate throttle control
-lock steering to lookdirup(-VELOCITY:SURFACE, facing:topvector). //steer to velocity vector -> AKA flamy end down
+lock steering to lookdirup(-VELOCITY:SURFACE, facing:upvector). //steer to velocity vector -> AKA flamy end down
 
 UNTIL RShut = 1 { //Main Flight Control Loop
   print "Velocity" at(0,21).
@@ -117,43 +118,59 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     SHIP:PARTSDUBBED("fin")[2]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
     SHIP:PARTSDUBBED("fin")[3]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
 
-    until ALT:RADAR < 350 { //Actually doing guidance here
-      print "Velocity" at(0,21).
-      print ship:groundspeed at(20,21).
-      print "Vehicle Status" at(0,20).
-      print Vehicle_Status at(20,20).
-      print "lngoff" at(0, 22).
-      print lngoff at(20, 22).
-      print "gain" at(0, 23).
-      print gain at(20, 23).
-      print "Time to Landing burn" at(0, 24).
-      print startTime at(20, 24).
+    until ship:verticalspeed > -0.1 { //Actually doing guidance here
+      if trueRadar > 400 {
+        print "Velocity" at(0,21).
+        print ship:groundspeed at(20,21).
+        print "Vehicle Status" at(0,20).
+        print Vehicle_Status at(20,20).
+        print "lngoff" at(0, 22).
+        print lngoff at(20, 22).
+        print "gain" at(0, 23).
+        print gain at(20, 23).
+        print "Time to Landing burn" at(0, 24).
+        print startTime at(20, 24).
 
-      if ALT:RADAR < 600 AND landingStart = 0 {  //Deploy landing legs and target ship
-        Set gain to -1. //Control gain
-        Set AltOffset to 0. //Target location altitude offset
-        set radarOffset to 26.  //Onboard altimeter adjustment (CoM to ground)
-        set landingStart to 1.  //Locks out statement
-      }
-      else if landingStart = 0 {
+        if trueRadar < 900 AND landingStart = 0 {  //Deploy landing legs and target ship
+          Set gain to -1. //Control gain
+          Set AltOffset to 0. //Target location altitude offset
+          set radarOffset to -20.  //Onboard altimeter adjustment (CoM to ground)
+          set landingStart to 1.  //Locks out statement
+          unlock steering. //reset steering
+        }
         Set gain to -2. //More control gain
+        rcs on.
+        SET Vehicle_Status to "Status [ 7 ]".
+        //Control Angle Calc thing
+        set output to -1*ship:velocity:surface*angleAxis(1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
+        //EXPLANATION: Takes the angle between target vector and velocity vector. Then takes cross product between the two to give a correction amount in the correct direction. This is than multiplied by a gain to increase control amount and veloctiy vector to give the vector a magnitude.
+        //SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(1,0,0),"Control",1,TRUE,0.5,TRUE).  //Draws Guidance Vector
+        //SET vdoutputVector TO VECDRAW(v(0,0,0),line_of_sight,RGB(0,1,0),"LOS",1,TRUE,0.5,TRUE).  //Draws Target Vector
+        //SET vdoutputVector TO VECDRAW(v(0,0,0),ship:velocity:surface,RGB(0,0,1),"Vel",1,TRUE,0.5,TRUE).  //Draws Velocity Vector
+        lock steering to lookdirup(output, facing:upvector). //output vector with specified rotation
+        lock throttle to idealThrottle. //Initiate landing burn to continuously adjust for good landing
       }
-      rcs on.
-      SET Vehicle_Status to "Status [ 7 ]".
-      //Control Angle Calc thing
-      set output to -1*ship:velocity:surface*angleAxis(1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).
-      //EXPLANATION: Takes the angle between target vector and velocity vector. Then takes cross product between the two to give a correction amount in the correct direction. This is than multiplied by a gain to increase control amount and veloctiy vector to give the vector a magnitude.
-      //SET vdoutputVector TO VECDRAW(v(0,0,0),output,RGB(1,0,0),"Control",1,TRUE,0.5,TRUE).  //Draws Guidance Vector
-      //SET vdoutputVector TO VECDRAW(v(0,0,0),line_of_sight,RGB(0,1,0),"LOS",1,TRUE,0.5,TRUE).  //Draws Target Vector
-      //SET vdoutputVector TO VECDRAW(v(0,0,0),ship:velocity:surface,RGB(0,0,1),"Vel",1,TRUE,0.5,TRUE).  //Draws Velocity Vector
-      lock steering to lookdirup(output, facing:topvector). //output vector with specified rotation
-      lock throttle to idealThrottle. //Initiate landing burn to continuously adjust for good landing
-    }
-    until ship:verticalspeed > -0.1 { //kill all horz and vert velocity in last 150 meters for soft landing...hopefully
-      SET Vehicle_Status to "Status [ 8 ]".
-      gear on.
-      lock steering to lookdirup(-VELOCITY:SURFACE, facing:topvector).
-      lock throttle to idealThrottle. 
+      else {
+        until ship:verticalspeed > -0.1 { //kill all horz and vert velocity in last 150 meters for soft landing...hopefully
+          print "Velocity" at(0,21).
+          print ship:groundspeed at(20,21).
+          print "Vehicle Status" at(0,20).
+          print Vehicle_Status at(20,20).
+          SET Vehicle_Status to "Status [ 8 ]".
+          set radarOffset to 27.  //Onboard altimeter adjustment (CoM to ground)
+          set limit to 51. //full aero control
+          rcs on.
+          SHIP:PARTSDUBBED("fin")[0]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
+          SHIP:PARTSDUBBED("fin")[1]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
+          SHIP:PARTSDUBBED("fin")[2]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
+          SHIP:PARTSDUBBED("fin")[3]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
+          if trueRadar < 200 {
+            gear on.
+          }
+          lock steering to srfretrograde.
+          lock throttle to idealThrottle. 
+        }
+      }
     }
     Set RShut to 1. //stop guidance
     LOCK THROTTLE TO 0.
@@ -163,7 +180,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     //Entry Burn
     if ALT:RADAR < 50000 AND EntryBurn = 0 {
       until ship:AIRSPEED < 950 {
-       lock steering to lookdirup(-VELOCITY:SURFACE, facing:topvector).
+       lock steering to lookdirup(-VELOCITY:SURFACE, facing:upvector).
         SET Vehicle_Status to "Status [ 4 ]".
         AG6 off.
         AG5 on.
@@ -183,7 +200,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
       if ALT:RADAR > 50000 {
         rcs on.
         SET Vehicle_Status to "Status [ 3 ]".
-        LOCK STEERING TO lookdirup(-VELOCITY:SURFACE, facing:topvector). //steer to velocity vector -> AKA flamy end down
+        LOCK STEERING TO lookdirup(-VELOCITY:SURFACE, facing:upvector). //steer to velocity vector -> AKA flamy end down
       }
       else {
         SET Vehicle_Status to "Status [ 6 ]".

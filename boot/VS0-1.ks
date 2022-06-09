@@ -1,13 +1,13 @@
 //Stage1 Booster Flight Profile Update
 // Boostback Conditions:
 // MUST be 1 if inclination is not equal to 90
-set boostback to 0.     //0 = water    1 = land
+set boostback to 1.     //0 = water    1 = land
 //If boostback = 1 Inclination can not be 90
 
 wait until ALT:RADAR > 500.
 if boostback = 0 {  //land on droneship
   if ship:verticalspeed < -10 {
-    RUNPATH("0:/VS2b.ks").  //run droneship software
+    RUNPATH("0:/boot/VS2b.ks").  //run droneship software
   }
   else {
     print ship:mass.
@@ -53,14 +53,14 @@ if boostback = 0 {  //land on droneship
     rcs off.
     sas off.
     unlock steering.
-    wait until ship:verticalspeed < -10. 
-    RUNPATH("0:/VS2b.ks").  //run droneship flight software
+    set core:bootfilename to "VS2b.ks".
+    RUNPATH("0:/boot/VS2b.ks").  //run droneship flight software
   }
 }
 
 else if boostback = 1 {
   if ship:verticalspeed < -10 {
-    RUNPATH("0:/VS2a.ks").  //run RTLS flight software
+    RUNPATH("0:/boot/VS2a.ks").  //run RTLS flight software
   }
   else {
     print ship:mass.
@@ -131,7 +131,7 @@ else if boostback = 1 {
     unlock all. //prevent errors and reset flight computer
     wait 2.
     rcs off.
-    wait until ship:verticalspeed < -10.
-    RUNPATH("0:/VS2a.ks").  //run RTLS flight software
+    set core:bootfilename to "VS2a.ks".
+    RUNPATH("0:/boot/VS2a.ks").  //run RTLS flight software
   }
 }

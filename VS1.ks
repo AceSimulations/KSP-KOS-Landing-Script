@@ -2,7 +2,7 @@
 CLEARSCREEN.
 
 //Orbit Param
-SET INCLINATION to 90.  //inclination   NOTE: CAN ONLY BE 90 IF DSL (Droneship landing)
+SET INCLINATION to 89.  //inclination   NOTE: CAN ONLY BE 90 IF DSL (Droneship landing)
 //NOTE: IF INCLINATION OTHER THAN 90 Must Boostback to LS
 SET TargetALT TO 250000.//orbital altitude  250km
 SET count to 1.         //countdown 0 = no  1 = yes
@@ -100,7 +100,7 @@ until SHIP:APOAPSIS > TargetALT {
             rcs on.
             lock throttle to .7.    //throttle down for MECO/Stage Sep
         }
-        if StageSep = 0 AND lngoff <= .95 {
+        if StageSep = 0 AND lngoff <= .92 {
             set gload to 2.5.
             lock throttle to 0.     //MECO
             SET Vehicle_Status to "Status [4]". // 1=pad idle 2=verticle climb 3=gravity turn S1 4=MECO/Stage Sep 5=Gravity Turn S2
@@ -121,7 +121,7 @@ until SHIP:APOAPSIS > TargetALT {
         }
     }
     else {
-        if StageSep = 0 AND SHIP:AIRSPEED > 1600 {  //Stop warping and stablize
+        if StageSep = 0 AND SHIP:AIRSPEED > 1500 {  //Stop warping and stablize
             SET WARP TO 0.
             rcs on.
             lock throttle to .7.    //throttle down for MECO/Stage Sep

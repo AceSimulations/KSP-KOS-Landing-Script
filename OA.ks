@@ -1,4 +1,9 @@
 //Orbital Adjustment
+set FailSafe to 1. //Not orbit so if fail no debris
+if Failsafe = 1 {
+    print "Vehicle Checks [Nominal Orbit]".
+    Shutdown.
+}
 print "Guidance [Converging]".
 lock desired_obt_speed to sqrt(ship:body:Mu / (ship:altitude + ship:body:radius)).
 lock desired_obt_vector to vxcl(-ship:body:position, ship:velocity:orbit):Normalized.
@@ -24,4 +29,5 @@ rcs on.
 wait .5.
 CLEARSCREEN.
 print "Vehicle Checks [Nominal Orbit]".
+SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
 Shutdown.
