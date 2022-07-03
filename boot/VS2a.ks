@@ -12,7 +12,7 @@ lock maxDecel to (ship:availablethrust / ship:mass) - g.  // Maximum deceleratio
 lock stopDist to ship:AIRSPEED^2 / (2 * maxDecel).  // The distance the burn will require
 lock idealThrottle to stopDist / trueRadar. // Throttle required for perfect hoverslam
 lock impactTime to trueRadar / abs(ship:verticalspeed). // Time until impact
-lock startTime to ((trueRadar - stopDist) / abs(ship:verticalspeed)) - 3. // Time until impact  (3 is for engine startup time)
+lock startTime to ((trueRadar - stopDist) / abs(ship:verticalspeed)) - 4. // Time until impact  (3 is for engine startup time)
 Set AltOffset to 100. //Target location altitude offset
 
 //Flight Conditions Init
@@ -30,8 +30,12 @@ SET T3 to SHIP:PARTSDUBBED("3").  //3rd from bottom tank
 SET T4 to SHIP:PARTSDUBBED("4").  //3rd from top tank
 SET T5 to SHIP:PARTSDUBBED("5").  //2nd from top tank
 SET T6 to SHIP:PARTSDUBBED("6").  //top tank
+SET T7 to SHIP:PARTSDUBBED("7").  //extra tank
+SET T8 to SHIP:PARTSDUBBED("7").  //extra tank 2
 print "Fuel Transfer Start".
 wait .1.
+SET LF8 TO TRANSFERALL("LqdMethane", T8, T1).
+SET LF7 TO TRANSFERALL("LqdMethane", T7, T1).
 SET LF6 TO TRANSFERALL("LqdMethane", T6, T1).
 SET LF5 TO TRANSFERALL("LqdMethane", T5, T1).
 SET LF4 TO TRANSFERALL("LqdMethane", T4, T1).
@@ -39,6 +43,8 @@ SET LF3 TO TRANSFERALL("LqdMethane", T3, T1).
 SET LF2 TO TRANSFERALL("LqdMethane", T2, T1).
 wait .1.
 print "Liguid Fuel Transfer Nominal".
+SET LF8:ACTIVE to TRUE.
+SET LF7:ACTIVE to TRUE.
 SET LF6:ACTIVE to TRUE.
 SET LF5:ACTIVE to TRUE.
 SET LF4:ACTIVE to TRUE.
@@ -46,6 +52,8 @@ SET LF3:ACTIVE to TRUE.
 SET LF2:ACTIVE to TRUE.
 print "Liguid Fuel Transfer Complete".
 wait .1.
+SET OX8 TO TRANSFERALL("OXIDIZER", T8, T1).
+SET OX7 TO TRANSFERALL("OXIDIZER", T7, T1).
 SET OX6 TO TRANSFERALL("OXIDIZER", T6, T1).
 SET OX5 TO TRANSFERALL("OXIDIZER", T5, T1).
 SET OX4 TO TRANSFERALL("OXIDIZER", T4, T1).
@@ -53,6 +61,8 @@ SET OX3 TO TRANSFERALL("OXIDIZER", T3, T1).
 SET OX2 TO TRANSFERALL("OXIDIZER", T2, T1).
 print "Oxidizer Fuel Transfer Nominal".
 wait .1.
+SET OX8:ACTIVE to TRUE.
+SET OX7:ACTIVE to TRUE.
 SET OX6:ACTIVE to TRUE.
 SET OX5:ACTIVE to TRUE.
 SET OX4:ACTIVE to TRUE.
@@ -94,12 +104,13 @@ SHIP:PARTSDUBBED("fin")[1]:GETMODULE("ModuleControlSurface"):setfield("authority
 SHIP:PARTSDUBBED("fin")[2]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
 SHIP:PARTSDUBBED("fin")[3]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
 AG7 on. //deploy brakes
-rcs on.
 sas off.
 Lights on.
 set throt to 0.
 LOCK THROTTLE TO throt. //initiate throttle control
 lock steering to lookdirup(-VELOCITY:SURFACE, facing:upvector). //steer to velocity vector -> AKA flamy end down
+wait 2.
+rcs on.
 
 UNTIL RShut = 1 { //Main Flight Control Loop
   print "Velocity" at(0,21).
@@ -119,7 +130,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     SHIP:PARTSDUBBED("fin")[3]:GETMODULE("ModuleControlSurface"):setfield("authority limiter", limit).
 
     until ship:verticalspeed > -0.1 { //Actually doing guidance here
-      if trueRadar > 400 {
+      if trueRadar > 300 {
         print "Velocity" at(0,21).
         print ship:groundspeed at(20,21).
         print "Vehicle Status" at(0,20).
@@ -131,15 +142,15 @@ UNTIL RShut = 1 { //Main Flight Control Loop
         print "Time to Landing burn" at(0, 24).
         print startTime at(20, 24).
 
-        if trueRadar < 900 AND landingStart = 0 {  //Deploy landing legs and target ship
+        if trueRadar < 900 AND landingStart = 0 {  //Deploy landing legs and target
           Set gain to -1. //Control gain
           Set AltOffset to 0. //Target location altitude offset
-          set radarOffset to -20.  //Onboard altimeter adjustment (CoM to ground)
+          set radarOffset to 0.  //Onboard altimeter adjustment (CoM to ground)
           set landingStart to 1.  //Locks out statement
           unlock steering. //reset steering
         }
         Set gain to -2. //More control gain
-        rcs on.
+        rcs off.
         SET Vehicle_Status to "Status [ 7 ]".
         //Control Angle Calc thing
         set output to -1*ship:velocity:surface*angleAxis(1*gain*vang(line_of_sight,ship:velocity:surface),vcrs(ship:velocity:surface,line_of_sight)).

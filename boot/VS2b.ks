@@ -31,8 +31,12 @@ SET T3 to SHIP:PARTSDUBBED("3").  //3rd from bottom tank
 SET T4 to SHIP:PARTSDUBBED("4").  //3rd from top tank
 SET T5 to SHIP:PARTSDUBBED("5").  //2nd from top tank
 SET T6 to SHIP:PARTSDUBBED("6").  //top tank
+SET T7 to SHIP:PARTSDUBBED("7").  //extra tank
+SET T8 to SHIP:PARTSDUBBED("7").  //extra tank 2
 print "Fuel Transfer Start".
 wait .1.
+SET LF8 TO TRANSFERALL("LqdMethane", T8, T1).
+SET LF7 TO TRANSFERALL("LqdMethane", T7, T1).
 SET LF6 TO TRANSFERALL("LqdMethane", T6, T1).
 SET LF5 TO TRANSFERALL("LqdMethane", T5, T1).
 SET LF4 TO TRANSFERALL("LqdMethane", T4, T1).
@@ -40,6 +44,8 @@ SET LF3 TO TRANSFERALL("LqdMethane", T3, T1).
 SET LF2 TO TRANSFERALL("LqdMethane", T2, T1).
 wait .1.
 print "Liguid Fuel Transfer Nominal".
+SET LF8:ACTIVE to TRUE.
+SET LF7:ACTIVE to TRUE.
 SET LF6:ACTIVE to TRUE.
 SET LF5:ACTIVE to TRUE.
 SET LF4:ACTIVE to TRUE.
@@ -47,6 +53,8 @@ SET LF3:ACTIVE to TRUE.
 SET LF2:ACTIVE to TRUE.
 print "Liguid Fuel Transfer Complete".
 wait .1.
+SET OX8 TO TRANSFERALL("OXIDIZER", T8, T1).
+SET OX7 TO TRANSFERALL("OXIDIZER", T7, T1).
 SET OX6 TO TRANSFERALL("OXIDIZER", T6, T1).
 SET OX5 TO TRANSFERALL("OXIDIZER", T5, T1).
 SET OX4 TO TRANSFERALL("OXIDIZER", T4, T1).
@@ -54,6 +62,8 @@ SET OX3 TO TRANSFERALL("OXIDIZER", T3, T1).
 SET OX2 TO TRANSFERALL("OXIDIZER", T2, T1).
 print "Oxidizer Fuel Transfer Nominal".
 wait .1.
+SET OX8:ACTIVE to TRUE.
+SET OX7:ACTIVE to TRUE.
 SET OX6:ACTIVE to TRUE.
 SET OX5:ACTIVE to TRUE.
 SET OX4:ACTIVE to TRUE.
@@ -161,7 +171,7 @@ UNTIL RShut = 1 { //Main Flight Control Loop
     }
     until ship:verticalspeed > -0.1 { //kill all horz and vert velocity in last 150 meters for soft landing...hopefully
       SET Vehicle_Status to "Status [ 8 ]".
-      set radarOffset to 30.  //Onboard altimeter adjustment (CoM to ground)
+      set radarOffset to 31.  //Onboard altimeter adjustment (CoM to ground)
       gear on.
       lock steering to lookdirup(-VELOCITY:SURFACE, facing:topvector).
       lock throttle to idealThrottle. 
